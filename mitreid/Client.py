@@ -115,3 +115,9 @@ def client_factory(api):
             for k, v in attrs.items():
                 setattr(self, k, v)
 
+        @classmethod
+        def _get_endpoint(cls, endpoint, fmt):
+            method, endpoint = cls._ENDPOINTS[endpoint]
+            f = getattr(requests, method)
+            return f, endpoint.format(fmt)
+
