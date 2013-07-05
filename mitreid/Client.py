@@ -174,3 +174,12 @@ def client_factory(api):
             # remove this instance's id
             self.id = None
 
+        def save(self):
+            """
+            Creates or updates in server from self
+            """
+            if self.id is None:
+                return self.create()
+            else:
+                return self.update()
+
