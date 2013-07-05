@@ -147,6 +147,13 @@ def client_factory(api):
 
             return cls(attrs)
 
+        @classmethod
+        def get(cls, id):
+            """
+            Synonym for read
+            """
+            return cls.read(id)
+
         def update(self):
             """
             Updates the server counterpart of this instance with it's current
