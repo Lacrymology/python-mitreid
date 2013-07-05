@@ -122,6 +122,15 @@ def client_factory(api):
             f = getattr(requests, method)
             return f, endpoint.format(fmt)
 
+        @classmethod
+        def clients_list(cls):
+            method, endpoint = cls._get_endpoint('list')
+            res = method(endpoint)
+            if not res.ok:
+                res.raise_for_error()
+            clients_json = json.loads(res.content)
+            return [cls(cj) for cj in clients_json]
+
         def create(self):
             # make sure we don't have an id
             self.id = None
