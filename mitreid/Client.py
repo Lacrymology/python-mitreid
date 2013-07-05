@@ -134,3 +134,16 @@ def client_factory(api):
             # update with server-created defaults
             self._fromdict(attrs)
 
+        @classmethod
+        def read(cls, id):
+            """
+            Returns a single Client getting it from the server by id
+            """
+            method, endpoint = cls._get_endpoint('read', {'id': id})
+            res = method(endpoint)
+            if not res.ok:
+                res.raise_for_error()
+            attrs = json.loads(res.content)
+
+            return cls(attrs)
+
