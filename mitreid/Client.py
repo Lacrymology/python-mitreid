@@ -161,3 +161,16 @@ def client_factory(api):
             attrs = json.loads(res.content)
             self._fromdict(attrs)
 
+        def delete(self):
+            """
+            Deletes the server counterpart of this instance. Does not destroy
+            the instance itself, but it removes the id
+            """
+            method, endpoint = self._get_endpoint('delete', {'id': self.id})
+            res = method(endpoint)
+            if not res.ok:
+                res.raise_for_error()
+
+            # remove this instance's id
+            self.id = None
+
