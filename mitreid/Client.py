@@ -11,6 +11,7 @@
 
 import copy
 import requests
+import json
 
 def client_factory(api):
     class Client(object):
@@ -120,4 +121,16 @@ def client_factory(api):
             method, endpoint = cls._ENDPOINTS[endpoint]
             f = getattr(requests, method)
             return f, endpoint.format(fmt)
+
+        def create(self):
+            # make sure we don't have an id
+            self.id = None
+            method, endpoint = self._get_endpoint('create')
+            res = method(endpoint, data=self._todict())
+            if not res.ok:
+                res.raise_for_error()
+            attrs = json.loads(res.content)
+
+            # update with server-created defaults
+            self._fromdict(attrs)
 
