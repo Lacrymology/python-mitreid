@@ -147,3 +147,17 @@ def client_factory(api):
 
             return cls(attrs)
 
+        def update(self):
+            """
+            Updates the server counterpart of this instance with it's current
+            attributes
+            """
+            method, endpoint = self._get_endpoint('update', {'id': self.id})
+            res = method(endpoint, data=self._todict())
+            if not res.ok:
+                res.raise_for_error()
+
+            # update any fields returned from the server
+            attrs = json.loads(res.content)
+            self._fromdict(attrs)
+
