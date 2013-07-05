@@ -190,3 +190,26 @@ def client_factory(api):
             else:
                 return self.update()
 
+        def add_scopes(self, scopes):
+            """
+            Add scopes to Client
+
+            `scopes` can be either a single scope string, or an iterable
+            """
+            if isinstance(scopes, basestring):
+                scopes = [scopes]
+            for scope in scopes:
+                if scope not in self.scope:
+                    self.scope.append(scope)
+
+        def remove_scopes(self, scopes):
+            """
+            Remove scopes from Client
+
+            `scopes` can be either a single scope string, or an iterable
+            """
+            if isinstance(scopes, basestring):
+                scopes = [scopes]
+            for scope in scopes:
+                if scope in self.scope:
+                    self.scope.remove(scope)
