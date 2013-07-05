@@ -15,8 +15,10 @@ import requests
 def client_factory(api):
     class Client(object):
         _DEFAULTS = {
+            "id": None,
             "clientId": "",
             "clientSecret": "",
+            "generateSecret": True,
             "redirectUris": [],
             "clientName": "",
             "clientUri": None,
