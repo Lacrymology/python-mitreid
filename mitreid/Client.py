@@ -76,8 +76,9 @@ def client_factory(api):
         _ENDPOINTS = {
             'list': ('get', ''),
             'create': ('post', ''),
-            'get': ('get', '/{id}'),
-
+            'read': ('get', '/{id}'),
+            'update': ('put', '/{id}'),
+            'delete': ('delete', '/{id}'),
         }
 
         def __init__(self, attrs=None, in_server=False, **kwargs):
