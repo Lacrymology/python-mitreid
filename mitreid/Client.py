@@ -81,25 +81,37 @@ def client_factory(api):
             'delete': ('delete', '/{id}'),
         }
 
-        def __init__(self, attrs=None, in_server=False, **kwargs):
+        def __init__(self, attrs=None, **kwargs):
             """
             attrs can be a dictionary of values to override the defaults, or
             the fields can be passed as keyword arguments.
 
             Keyword arguments take precedence before the attrs dictionary
 
-            in_server tells this instance to expect to have a server counterpart
+            If an 'id' attribute is present, the Client is assumed to have a
+            server counterpart
             """
-            self.attrs = copy.deepcopy(self._DEFAULTS)
+            d = copy.deepcopy(self._DEFAULTS)
             if attrs:
-                self.attrs.update(attrs)
-            self.attrs.update(kwargs)
-            self._in_server = in_server
+                d.update(attrs)
+            d.update(kwargs)
 
-        def __getattr__(self, item):
-            try:
-                return self.attrs[item]
-            except KeyError:
-                raise (AttributeError,
-                       "'{}' object has no attribute '{}'".format(
-                           self.__class__, item))
+            self._fromdict(d)
+
+            # if a clientSecret was provided, we need to override this default
+            if self.clientSecret:
+                self.generateSecret = False
+
+        def _todict(self):
+            ret = {}
+            for k in self._DEFAULTS:
+                try:
+                    ret[k] = getattr(self, k)
+                except AttributeError:
+                    pass
+            return ret
+
+        def _fromdict(self, attrs):
+            for k, v in attrs.items():
+                setattr(self, k, v)
+
