@@ -13,10 +13,10 @@ import copy
 import requests
 import json
 
-from mitreid.base import BaseApi
+from mitreid.base import BaseApiObject
 
 def client_factory(api):
-    class Client(BaseApi):
+    class Client(BaseApiObject):
         _DEFAULTS = {
             "id": None,
             "clientId": "",

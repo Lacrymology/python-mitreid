@@ -11,7 +11,7 @@
 import copy
 import requests
 
-class BaseApi(object):
+class BaseApiObject(object):
     """
     * _DEFAULTS is a dictionary are the default values for the subclass. It's
       keys list is used to build the dictionary to be passed as data to the

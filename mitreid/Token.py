@@ -9,11 +9,11 @@
 
 """
 import json
-from mitreid.base import BaseApi
+from mitreid.base import BaseApiObject
 
 
 def token_factory(api):
-    class Token(BaseApi):
+    class Token(BaseApiObject):
         """
         OAuth Token class.
 
