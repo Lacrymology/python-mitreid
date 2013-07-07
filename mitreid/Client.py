@@ -94,7 +94,7 @@ def client_factory(api):
             If an 'id' attribute is present, the Client is assumed to have a
             server counterpart
             """
-            super(self, Client).__init__(attrs=attrs, **kwargs)
+            super(self, Client).__init__(api, attrs=attrs, **kwargs)
 
             # if a clientSecret was provided, we need to override this default
             if self.clientSecret:

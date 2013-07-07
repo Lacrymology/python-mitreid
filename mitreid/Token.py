@@ -39,6 +39,9 @@ def token_factory(api):
             'delete': ('delete', ''),
         }
 
+        def __init__(self, *args, **kwargs):
+            return super(Token, self).__init__(api, *args, **kwargs)
+
         @classmethod
         def create(cls, clientId, grantedScopes=None, grantedPersonas=None):
             """
