@@ -13,8 +13,10 @@ import copy
 import requests
 import json
 
+from mitreid.base import BaseApi
+
 def client_factory(api):
-    class Client(object):
+    class Client(BaseApi):
         _DEFAULTS = {
             "id": None,
             "clientId": "",
@@ -92,35 +94,11 @@ def client_factory(api):
             If an 'id' attribute is present, the Client is assumed to have a
             server counterpart
             """
-            d = copy.deepcopy(self._DEFAULTS)
-            if attrs:
-                d.update(attrs)
-            d.update(kwargs)
-
-            self._fromdict(d)
+            super(self, Client).__init__(attrs=attrs, **kwargs)
 
             # if a clientSecret was provided, we need to override this default
             if self.clientSecret:
                 self.generateSecret = False
-
-        def _todict(self):
-            ret = {}
-            for k in self._DEFAULTS:
-                try:
-                    ret[k] = getattr(self, k)
-                except AttributeError:
-                    pass
-            return ret
-
-        def _fromdict(self, attrs):
-            for k, v in attrs.items():
-                setattr(self, k, v)
-
-        @classmethod
-        def _get_endpoint(cls, endpoint, fmt):
-            method, endpoint = cls._ENDPOINTS[endpoint]
-            f = getattr(requests, method)
-            return f, endpoint.format(fmt)
 
         @classmethod
         def clients_list(cls):
