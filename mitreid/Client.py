@@ -9,21 +9,22 @@
 
 """
 
-import copy
-import requests
 import json
 
 from mitreid.base import BaseApiObject
+from mitreid.exceptions import MitreIdException
+
+JSON_MEDIA_TYPE = 'application/json'
 
 def client_factory(api):
     class Client(BaseApiObject):
         _DEFAULTS = {
-            "id": None,
-            "clientId": "",
-            "clientSecret": "",
-            "generateSecret": True,
-            "redirectUris": [],
-            "clientName": "",
+            "id": None,  # diff
+            "clientId": "",  # diff
+            "clientSecret": "",  # diff
+            "generateSecret": True,  # added
+            "redirectUris": [],  # diff
+            "clientName": "",  # diff
             "clientUri": None,
             "logoUri": None,
             "contacts": [],
@@ -69,19 +70,19 @@ def client_factory(api):
             "clientDescription": None,
             "reuseRefreshToken": True,
             "dynamicallyRegistered": False,
-            "allowIntrospection": False,
+            "allowIntrospection": True,
             "idTokenValiditySeconds": 600,
             "createdAt": None
         }
 
-        _API_ROOT = '/api/clients'
+        _API_ROOT = 'https://logrus.idhypercubed.org/idoic/api/clients'
 
         _ENDPOINTS = {
-            'list': ('get', ''),
-            'create': ('post', ''),
-            'read': ('get', '/{id}'),
-            'update': ('put', '/{id}'),
-            'delete': ('delete', '/{id}'),
+            'list':   ('GET',    _API_ROOT),
+            'create': ('POST',   _API_ROOT),
+            'read':   ('GET',    _API_ROOT + '/{id}'),
+            'update': ('PUT',    _API_ROOT + '/{id}'),
+            'delete': ('DELETE', _API_ROOT + '/{id}'),
         }
 
         def __init__(self, attrs=None, **kwargs):
@@ -94,7 +95,7 @@ def client_factory(api):
             If an 'id' attribute is present, the Client is assumed to have a
             server counterpart
             """
-            super(self, Client).__init__(api, attrs=attrs, **kwargs)
+            super(Client, self).__init__(api, attrs=attrs, **kwargs)
 
             # if a clientSecret was provided, we need to override this default
             if self.clientSecret:
@@ -102,20 +103,24 @@ def client_factory(api):
 
         @classmethod
         def clients_list(cls):
+            headers = {'Authorization': 'Bearer ' + api.token.accessToken}
             method, endpoint = cls._get_endpoint('list')
-            res = method(endpoint)
-            if not res.ok:
-                res.raise_for_error()
+            res = method(endpoint, headers=headers, verify=False)
+            if res.status_code != 200:
+                raise MitreIdException
             clients_json = json.loads(res.content)
             return [cls(cj) for cj in clients_json]
 
-        def create(self):
+        def _create(self):
             # make sure we don't have an id
             self.id = None
+            data = json.dumps(self._todict())
+            headers={'Authorization': 'Bearer ' + api.token.accessToken,
+                     'Content-Type': JSON_MEDIA_TYPE}
             method, endpoint = self._get_endpoint('create')
-            res = method(endpoint, data=self._todict())
-            if not res.ok:
-                res.raise_for_error()
+            res = method(endpoint, data=data, headers=headers, verify=False)
+            if res.status_code != 200:
+                raise MitreIdException
             attrs = json.loads(res.content)
 
             # update with server-created defaults
@@ -126,30 +131,28 @@ def client_factory(api):
             """
             Returns a single Client getting it from the server by id
             """
+            headers = {'Authorization': 'Bearer ' + api.token.accessToken}
             method, endpoint = cls._get_endpoint('read', {'id': id})
-            res = method(endpoint)
-            if not res.ok:
-                res.raise_for_error()
+            res = method(endpoint, headers=headers, verify=False)
+            if res.status_code != 200:
+                raise MitreIdException
             attrs = json.loads(res.content)
 
             return cls(attrs)
+        get = read
 
-        @classmethod
-        def get(cls, id):
-            """
-            Synonym for read
-            """
-            return cls.read(id)
-
-        def update(self):
+        def _update(self):
             """
             Updates the server counterpart of this instance with it's current
             attributes
             """
+            data = json.dumps(self._todict())
+            headers = {'Authorization': 'Bearer ' + api.token.accessToken,
+                       'Content-Type': JSON_MEDIA_TYPE}
             method, endpoint = self._get_endpoint('update', {'id': self.id})
-            res = method(endpoint, data=self._todict())
-            if not res.ok:
-                res.raise_for_error()
+            res = method(endpoint, data=data, headers=headers, verify=False)
+            if res.status_code != 200:
+                raise MitreIdException
 
             # update any fields returned from the server
             attrs = json.loads(res.content)
@@ -160,10 +163,11 @@ def client_factory(api):
             Deletes the server counterpart of this instance. Does not destroy
             the instance itself, but it removes the id
             """
+            headers = {'Authorization': 'Bearer ' + api.token.accessToken}
             method, endpoint = self._get_endpoint('delete', {'id': self.id})
-            res = method(endpoint)
-            if not res.ok:
-                res.raise_for_error()
+            res = method(endpoint, headers=headers, verify=False)
+            if res.status_code != 200:
+                raise MitreIdException
 
             # remove this instance's id
             self.id = None
@@ -173,9 +177,9 @@ def client_factory(api):
             Creates or updates in server from self
             """
             if self.id is None:
-                return self.create()
+                return self._create()
             else:
-                return self.update()
+                return self._update()
 
         def add_scopes(self, scopes):
             """
@@ -200,3 +204,10 @@ def client_factory(api):
             for scope in scopes:
                 if scope in self.scope:
                     self.scope.remove(scope)
+
+        def __repr__(self):
+            return '[Client: %s %s %s]' % (self.id,
+                                           self.clientId,
+                                           self.clientName)
+
+    return Client

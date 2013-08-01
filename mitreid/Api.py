@@ -21,3 +21,9 @@ class Api(object):
         self.Token = token_factory(self)
         self.token = self.Token(accessToken=accessToken)
         self.Client = client_factory(self)
+
+    def defaultGrantedScopes(self):
+        return []
+
+    def defaultGrantedPersonas(self):
+        return []

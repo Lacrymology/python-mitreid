@@ -9,8 +9,11 @@
 
 """
 import json
-from mitreid.base import BaseApiObject
 
+from mitreid.base import BaseApiObject
+from mitreid.exceptions import MitreIdException
+
+JSON_MEDIA_TYPE = 'application/json'
 
 def token_factory(api):
     class Token(BaseApiObject):
@@ -24,23 +27,24 @@ def token_factory(api):
             token.load_details() (or .read())
         """
         _DEFAULTS = {
-            "clientId": "",
-            "grantedScopes": api.defaultGrantedScopes(),
-            "grantedPersonas": api.defaultGrantedPersonas(),
+            "authorizedScopesSet": api.defaultGrantedScopes(),
+            "authorizedPersonaSet": api.defaultGrantedPersonas(),
             "accessToken": "",
-            "accessTokenExpiresAt": None
+            "accessTokenExpiresAt": None,
+            "clientId": "",
+            "authorizingUser": ""
         }
 
-        _API_ROOT = '/idoic/tokenapi'
+        _API_ROOT = 'https://logrus.idhypercubed.org/idoic/tokenapi'
 
         _ENDPOINTS = {
-            'create': ('post', ''),
-            'read': ('get', ''),
-            'delete': ('delete', ''),
+            'create': ('POST',   _API_ROOT),
+            'read':   ('GET',    _API_ROOT),
+            'delete': ('DELETE', _API_ROOT),
         }
 
         def __init__(self, *args, **kwargs):
-            return super(Token, self).__init__(api, *args, **kwargs)
+            super(Token, self).__init__(api, *args, **kwargs)
 
         @classmethod
         def create(cls, clientId, grantedScopes=None, grantedPersonas=None):
@@ -57,46 +61,56 @@ def token_factory(api):
                 grantedPersonas = api.defaultGrantedPersonas()
 
             # make sure we don't have an id
+            data = json.dumps({'clientId': clientId,
+                               'grantedPersonas': grantedPersonas,
+                               'grantedScopes': grantedScopes})
+            headers = {'Authorization': 'Bearer ' + api.token.accessToken,
+                       'Content-Type': JSON_MEDIA_TYPE}
             method, endpoint = cls._get_endpoint('create')
-            res = method(endpoint, data={ 'clientId': clientId,
-                                          'grantedPersonas': grantedPersonas,
-                                          'grantedScopes': grantedScopes })
-            if not res.ok:
-                res.raise_for_error()
+            res = method(endpoint, data=data, headers=headers, verify=False)
+            if res.status_code != 200:
+                raise MitreIdException
             attrs = json.loads(res.content)
 
             # create with server response
             return cls(attrs)
 
-        def read(self):
+        @classmethod
+        def read(cls, token=None):
             """
             Loads self with info from the server. Only the clientToken property
             needs to be filled in. Everything else will be overriden with the
             data from the server
             """
-            method, endpoint = self._get_endpoint('read')
-            res = method(endpoint)
-            if not res.ok:
-                res.raise_for_error()
+            if token is None:
+                token = api.token.accessToken
+            headers = {'Authorization': 'Bearer ' + token}
+            method, endpoint = cls._get_endpoint('read')
+            res = method(endpoint, headers=headers, verify=False)
+            if res.status_code != 200:
+                raise MitreIdException
             attrs = json.loads(res.content)
 
-            self._fromdict(attrs)
-
-        def load_details(self):
-            return self.read()
+            return cls(attrs)
+        load_details = read
 
         def delete(self):
             """
             Revokes this Token
             """
+            data = json.dumps({'clientId': self.clientId,
+                               'clientToken': self.accessToken})
+            headers = {'Authorization': 'Bearer ' + api.token.accessToken,
+                       'Content-Type': JSON_MEDIA_TYPE}
             method, endpoint = self._get_endpoint('delete')
-            res = method(endpoint, data=self._todict(['clientId',
-                                                      'clientToken']))
-            if not res.ok:
-                res.raise_for_error()
+            res = method(endpoint, data=data, headers=headers, verify=False)
+            if res.status_code != 200:
+                raise MitreIdException
+        revoke = delete
 
-            # remove this instance's id
-            self.id = None
+        def __repr__(self):
+            return '[Token: %s...%s %s]' % (self.accessToken[:10],
+                                            self.accessToken[-10:],
+                                            self.clientId)
 
-        def revoke(self):
-            return self.delete()
+    return Token

@@ -21,7 +21,7 @@ class BaseApiObject(object):
             action: (http method, /endpoint/path),
             }. /endpoint/path is based on _API_ROOT.
       For example, with API_ROOT=/api/clients, { 'update': ('put', '/{id}')} will
-      make a POST request to /api/clients/{id}
+      make a PUT request to /api/clients/{id}
     """
     _DEFAULTS = {}
     _API_ROOT = ''
@@ -62,8 +62,8 @@ class BaseApiObject(object):
         if fmt is None:
             fmt = {}
         method, endpoint = cls._ENDPOINTS[endpoint]
-        f = getattr(requests, method)
-        return f, endpoint.format(fmt)
+        f = getattr(requests, method.lower())
+        return f, endpoint.format(**fmt)
 
     def _auth(self):
         return self._api.token
