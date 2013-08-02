@@ -3,6 +3,7 @@ import unittest
 from mitreid.Api import Api
 from mitreid.exceptions import MitreIdException
 
+HOST = 'logrus.idhypercubed.org'
 TOKEN = """eyJhbGciOiJSUzI1NiJ9.eyJleHAiOjEzNzg0NzQyMzQsImF1ZCI6WyJpZDMtb2ljLWRlbW8tY2xpZW50Il0sImlzcyI6Imh0dHBzOlwvXC9sb2dydXMuaWRoeXBlcmN1YmVkLm9yZ1wvaWRvaWNcLyIsImp0aSI6IjY5OTcwODRhLTExMTMtNDRiMi05MDhmLTUwOWRmZTUwZGIyMSIsImlhdCI6MTM3NDg3NDIzNH0.B01BHN82r34_WFSiLkzFH5pOs-brXJT5_lkwnGXfQqepVO1jgX0W3dJgsr8fqC5cWWISxbV6Mx76udnWYiRVDWUEdUL2KgMltZIXqgy5ru8TmL9USw0hXFarAmcANyOM8cyF2lvT2qCUeW_Dda7X3g8nhV_U4ceFrtF6jJK3WLc"""
 SCOPES_FOR_TOKEN = ['address', 'email', 'openid', 'phone', 'profile',
                     'superclient']
@@ -16,7 +17,7 @@ class ClientCreationDeletionTestCase(unittest.TestCase):
         '''
         Test the creation and deletion of a client
         '''
-        api = Api(TOKEN)
+        api = Api(TOKEN, HOST)
         client = api.Client(clientId='test_client', clientSecret='password')
         client.save()
 
@@ -34,7 +35,7 @@ class ClientTestCase(unittest.TestCase):
         '''
         Create a per-test client
         '''
-        self.api = Api(TOKEN)
+        self.api = Api(TOKEN, HOST)
         self.client = self.api.Client(clientId='test_client',
                                       clientSecret='password',
                                       scope=['foo', 'bar'])
@@ -123,7 +124,7 @@ class TokenTestCase(unittest.TestCase):
         '''
         Create a per-test API object
         '''
-        self.api = Api(TOKEN)
+        self.api = Api(TOKEN, HOST)
 
     def test_create_and_delete(self):
         '''

@@ -35,7 +35,7 @@ def token_factory(api):
             "authorizingUser": ""
         }
 
-        _API_ROOT = 'https://logrus.idhypercubed.org/idoic/tokenapi'
+        _API_ROOT = 'https://{host}/idoic/tokenapi'
 
         _ENDPOINTS = {
             'create': ('POST',   _API_ROOT),
@@ -66,7 +66,8 @@ def token_factory(api):
                                'grantedScopes': grantedScopes})
             headers = {'Authorization': 'Bearer ' + api.token.accessToken,
                        'Content-Type': JSON_MEDIA_TYPE}
-            method, endpoint = cls._get_endpoint('create')
+            method, endpoint = cls._get_endpoint('create',
+                                                 {'host': api.oidcHost})
             res = method(endpoint, data=data, headers=headers, verify=False)
             if res.status_code != 200:
                 raise MitreIdException
@@ -85,7 +86,8 @@ def token_factory(api):
             if token is None:
                 token = api.token.accessToken
             headers = {'Authorization': 'Bearer ' + token}
-            method, endpoint = cls._get_endpoint('read')
+            method, endpoint = cls._get_endpoint('read',
+                                                 {'host': api.oidcHost})
             res = method(endpoint, headers=headers, verify=False)
             if res.status_code != 200:
                 raise MitreIdException
@@ -102,7 +104,8 @@ def token_factory(api):
                                'clientToken': self.accessToken})
             headers = {'Authorization': 'Bearer ' + api.token.accessToken,
                        'Content-Type': JSON_MEDIA_TYPE}
-            method, endpoint = self._get_endpoint('delete')
+            method, endpoint = self._get_endpoint('delete',
+                                                  {'host': api.oidcHost})
             res = method(endpoint, data=data, headers=headers, verify=False)
             if res.status_code != 200:
                 raise MitreIdException
