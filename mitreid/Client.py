@@ -75,7 +75,7 @@ def client_factory(api):
             "createdAt": None
         }
 
-        _API_ROOT = 'https://{host}/idoic/api/clients'
+        _API_ROOT = '/idoic/api/clients'
 
         _ENDPOINTS = {
             'list':   ('GET',    ''),
@@ -104,8 +104,7 @@ def client_factory(api):
         @classmethod
         def clients_list(cls):
             headers = {'Authorization': 'Bearer ' + api.token.accessToken}
-            method, endpoint = cls._get_endpoint('list',
-                                                 {'host': api.oidcHost})
+            method, endpoint = cls._get_endpoint('list')
             res = method(endpoint, headers=headers, verify=False)
             if res.status_code != 200:
                 raise MitreIdException
@@ -118,8 +117,7 @@ def client_factory(api):
             data = json.dumps(self._todict())
             headers={'Authorization': 'Bearer ' + api.token.accessToken,
                      'Content-Type': JSON_MEDIA_TYPE}
-            method, endpoint = self._get_endpoint('create',
-                                                  {'host': api.oidcHost})
+            method, endpoint = self._get_endpoint('create')
             res = method(endpoint, data=data, headers=headers, verify=False)
             if res.status_code != 200:
                 raise MitreIdException
@@ -134,9 +132,7 @@ def client_factory(api):
             Returns a single Client getting it from the server by id
             """
             headers = {'Authorization': 'Bearer ' + api.token.accessToken}
-            method, endpoint = cls._get_endpoint('read',
-                                                 {'host': api.oidcHost,
-                                                  'id': id})
+            method, endpoint = cls._get_endpoint('read', {'id': id})
             res = method(endpoint, headers=headers, verify=False)
             if res.status_code != 200:
                 raise MitreIdException
@@ -153,9 +149,7 @@ def client_factory(api):
             data = json.dumps(self._todict())
             headers = {'Authorization': 'Bearer ' + api.token.accessToken,
                        'Content-Type': JSON_MEDIA_TYPE}
-            method, endpoint = self._get_endpoint('update',
-                                                  {'host': api.oidcHost,
-                                                   'id': self.id})
+            method, endpoint = self._get_endpoint('update', {'id': self.id})
             res = method(endpoint, data=data, headers=headers, verify=False)
             if res.status_code != 200:
                 raise MitreIdException
@@ -170,9 +164,7 @@ def client_factory(api):
             the instance itself, but it removes the id
             """
             headers = {'Authorization': 'Bearer ' + api.token.accessToken}
-            method, endpoint = self._get_endpoint('delete',
-                                                  {'host': api.oidcHost,
-                                                   'id': self.id})
+            method, endpoint = self._get_endpoint('delete', {'id': self.id})
             res = method(endpoint, headers=headers, verify=False)
             if res.status_code != 200:
                 raise MitreIdException

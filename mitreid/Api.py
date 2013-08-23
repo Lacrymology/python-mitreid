@@ -19,6 +19,7 @@ class Api(object):
         user
         """
         self.oidcHost = oidcHost
+        self.root = 'https://{}'.format(self.oidcHost)
         self.Token = token_factory(self)
         self.token = self.Token(accessToken=accessToken)
         self.Client = client_factory(self)
