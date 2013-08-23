@@ -13,6 +13,8 @@ from mitreid.Token import token_factory
 
 
 class Api(object):
+    defaultScopes = ['openid', 'profile', 'email', 'address', 'phone', 'offline_access']
+    defaultPersonas = ['Home', 'Work', 'Mobile']
     def __init__(self, accessToken, oidcHost):
         """
         `accessToken` is an accessToken string that identifies the requesting
@@ -25,7 +27,7 @@ class Api(object):
         self.Client = client_factory(self)
 
     def defaultGrantedScopes(self):
-        return []
+        return self.defaultScopes
 
     def defaultGrantedPersonas(self):
-        return []
+        return self.defaultPersonas

@@ -30,14 +30,7 @@ def client_factory(api):
             "contacts": [],
             "tosUri": None,
             "tokenEndpointAuthMethod": None,
-            "scope": [
-                # "phone",
-                # "openid",
-                # "offline_access",
-                # "address",
-                # "email",
-                # "profile"
-            ],
+            "scope": api.defaultGrantedScopes(),
             "grantTypes": [
                 # "implicit",
                 # "authorization_code",
