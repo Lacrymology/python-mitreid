@@ -26,6 +26,7 @@ def token_factory(api):
             token = Token(accessToken=<access token>)
             token.load_details() (or .read())
         """
+        _api = api
         _DEFAULTS = {
             "authorizedScopesSet": api.defaultGrantedScopes(),
             "authorizedPersonaSet": api.defaultGrantedPersonas(),
@@ -42,9 +43,6 @@ def token_factory(api):
             'read':   ('GET',    ''),
             'delete': ('DELETE', ''),
         }
-
-        def __init__(self, *args, **kwargs):
-            super(Token, self).__init__(api, *args, **kwargs)
 
         @classmethod
         def create(cls, clientId, grantedScopes=None, grantedPersonas=None):

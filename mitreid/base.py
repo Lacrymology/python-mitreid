@@ -27,14 +27,13 @@ class BaseApiObject(object):
     _API_ROOT = ''
     _ENDPOINTS = {}
 
-    def __init__(self, api, attrs=None, **kwargs):
+    def __init__(self, attrs=None, **kwargs):
         """
         attrs can be a dictionary of values to override the defaults, or
         the fields can be passed as keyword arguments.
 
         Keyword arguments take precedence before the attrs dictionary
         """
-        self._api = api
         d = copy.deepcopy(self._DEFAULTS)
         if attrs:
             d.update(attrs)

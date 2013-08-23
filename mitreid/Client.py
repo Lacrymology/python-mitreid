@@ -18,6 +18,7 @@ JSON_MEDIA_TYPE = 'application/json'
 
 def client_factory(api):
     class Client(BaseApiObject):
+        _api = api
         _DEFAULTS = {
             "id": None,  # diff
             "clientId": "",  # diff
@@ -88,7 +89,7 @@ def client_factory(api):
             If an 'id' attribute is present, the Client is assumed to have a
             server counterpart
             """
-            super(Client, self).__init__(api, attrs=attrs, **kwargs)
+            super(Client, self).__init__(attrs=attrs, **kwargs)
 
             # if a clientSecret was provided, we need to override this default
             if self.clientSecret:
