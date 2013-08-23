@@ -54,15 +54,15 @@ def token_factory(api):
             to grant no scopes or personas, pass empty lists instead
             """
             if grantedScopes is None:
-                grantedScopes = api.defaultGrantedScopes()
+                grantedScopes = cls._api.defaultGrantedScopes()
             if grantedPersonas is None:
-                grantedPersonas = api.defaultGrantedPersonas()
+                grantedPersonas = cls._api.defaultGrantedPersonas()
 
             # make sure we don't have an id
             data = json.dumps({'clientId': clientId,
                                'grantedPersonas': grantedPersonas,
                                'grantedScopes': grantedScopes})
-            headers = {'Authorization': 'Bearer ' + api.token.accessToken,
+            headers = {'Authorization': 'Bearer ' + cls._api.token.accessToken,
                        'Content-Type': JSON_MEDIA_TYPE}
             method, endpoint = cls._get_endpoint('create')
             res = method(endpoint, data=data, headers=headers, verify=False)
@@ -81,7 +81,7 @@ def token_factory(api):
             data from the server
             """
             if token is None:
-                token = api.token.accessToken
+                token = cls._api.token.accessToken
             headers = {'Authorization': 'Bearer ' + token}
             method, endpoint = cls._get_endpoint('read')
             res = method(endpoint, headers=headers, verify=False)
@@ -98,7 +98,7 @@ def token_factory(api):
             """
             data = json.dumps({'clientId': self.clientId,
                                'clientToken': self.accessToken})
-            headers = {'Authorization': 'Bearer ' + api.token.accessToken,
+            headers = {'Authorization': 'Bearer ' + self._api.token.accessToken,
                        'Content-Type': JSON_MEDIA_TYPE}
             method, endpoint = self._get_endpoint('delete')
             res = method(endpoint, data=data, headers=headers, verify=False)
