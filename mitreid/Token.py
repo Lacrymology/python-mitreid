@@ -38,9 +38,9 @@ def token_factory(api):
         _API_ROOT = 'https://{host}/idoic/tokenapi'
 
         _ENDPOINTS = {
-            'create': ('POST',   _API_ROOT),
-            'read':   ('GET',    _API_ROOT),
-            'delete': ('DELETE', _API_ROOT),
+            'create': ('POST',   ''),
+            'read':   ('GET',    ''),
+            'delete': ('DELETE', ''),
         }
 
         def __init__(self, *args, **kwargs):

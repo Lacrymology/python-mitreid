@@ -63,7 +63,7 @@ class BaseApiObject(object):
             fmt = {}
         method, endpoint = cls._ENDPOINTS[endpoint]
         f = getattr(requests, method.lower())
-        return f, endpoint.format(**fmt)
+        return f, (cls._API_ROOT + endpoint).format(**fmt)
 
     def _auth(self):
         return self._api.token

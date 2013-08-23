@@ -78,11 +78,11 @@ def client_factory(api):
         _API_ROOT = 'https://{host}/idoic/api/clients'
 
         _ENDPOINTS = {
-            'list':   ('GET',    _API_ROOT),
-            'create': ('POST',   _API_ROOT),
-            'read':   ('GET',    _API_ROOT + '/{id}'),
-            'update': ('PUT',    _API_ROOT + '/{id}'),
-            'delete': ('DELETE', _API_ROOT + '/{id}'),
+            'list':   ('GET',    ''),
+            'create': ('POST',   ''),
+            'read':   ('GET',    '/{id}'),
+            'update': ('PUT',    '/{id}'),
+            'delete': ('DELETE', '/{id}'),
         }
 
         def __init__(self, attrs=None, **kwargs):
