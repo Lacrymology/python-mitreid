@@ -65,7 +65,7 @@ class BaseApiObject(object):
         return f, "{}{}{}".format(cls._api.root, # https://example.com
                                   cls._API_ROOT, # /path/to/(clients|tokenapi)
                                   endpoint       # /{id}
-                                  ).format(fmt)
+                                  ).format(**fmt)
 
     def _auth(self):
         return self._api.token
