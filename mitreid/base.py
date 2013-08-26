@@ -67,5 +67,10 @@ class BaseApiObject(object):
                                   endpoint       # /{id}
                                   ).format(**fmt)
 
-    def _auth(self):
-        return self._api.token
+    @classmethod
+    def _get_headers(cls, extra=None):
+        if extra is None:
+            extra = {}
+        headers = {'Authorization': 'Bearer ' + cls._api.token.accessToken}
+        headers.update(extra)
+        return headers

@@ -62,8 +62,7 @@ def token_factory(api):
             data = json.dumps({'clientId': clientId,
                                'grantedPersonas': grantedPersonas,
                                'grantedScopes': grantedScopes})
-            headers = {'Authorization': 'Bearer ' + cls._api.token.accessToken,
-                       'Content-Type': JSON_MEDIA_TYPE}
+            headers = cls._get_headers(extra={'Content-Type': JSON_MEDIA_TYPE})
             method, endpoint = cls._get_endpoint('create')
             res = method(endpoint, data=data, headers=headers, verify=False)
             if res.status_code != 200:
@@ -82,7 +81,7 @@ def token_factory(api):
             """
             if token is None:
                 token = cls._api.token.accessToken
-            headers = {'Authorization': 'Bearer ' + token}
+            headers = cls._get_headers()
             method, endpoint = cls._get_endpoint('read')
             res = method(endpoint, headers=headers, verify=False)
             if res.status_code != 200:
@@ -98,8 +97,7 @@ def token_factory(api):
             """
             data = json.dumps({'clientId': self.clientId,
                                'clientToken': self.accessToken})
-            headers = {'Authorization': 'Bearer ' + self._api.token.accessToken,
-                       'Content-Type': JSON_MEDIA_TYPE}
+            headers = self._get_headers(extra={'Content-Type': JSON_MEDIA_TYPE})
             method, endpoint = self._get_endpoint('delete')
             res = method(endpoint, data=data, headers=headers, verify=False)
             if res.status_code != 200:

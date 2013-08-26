@@ -97,7 +97,7 @@ def client_factory(api):
 
         @classmethod
         def clients_list(cls):
-            headers = {'Authorization': 'Bearer ' + cls._api.token.accessToken}
+            headers = cls._get_headers()
             method, endpoint = cls._get_endpoint('list')
             res = method(endpoint, headers=headers, verify=False)
             if res.status_code != 200:
@@ -109,8 +109,7 @@ def client_factory(api):
             # make sure we don't have an id
             self.id = None
             data = json.dumps(self._todict())
-            headers={'Authorization': 'Bearer ' + self._api.token.accessToken,
-                     'Content-Type': JSON_MEDIA_TYPE}
+            headers = self._get_headers(extra={'Content-Type': JSON_MEDIA_TYPE})
             method, endpoint = self._get_endpoint('create')
             res = method(endpoint, data=data, headers=headers, verify=False)
             if res.status_code != 200:
@@ -125,7 +124,7 @@ def client_factory(api):
             """
             Returns a single Client getting it from the server by id
             """
-            headers = {'Authorization': 'Bearer ' + cls._api.token.accessToken}
+            headers = cls._get_headers()
             method, endpoint = cls._get_endpoint('read', {'id': id})
             res = method(endpoint, headers=headers, verify=False)
             if res.status_code != 200:
@@ -141,8 +140,7 @@ def client_factory(api):
             attributes
             """
             data = json.dumps(self._todict())
-            headers = {'Authorization': 'Bearer ' + self._api.token.accessToken,
-                       'Content-Type': JSON_MEDIA_TYPE}
+            headers = self._get_headers(extra={'Content-Type': JSON_MEDIA_TYPE})
             method, endpoint = self._get_endpoint('update', {'id': self.id})
             res = method(endpoint, data=data, headers=headers, verify=False)
             if res.status_code != 200:
@@ -157,7 +155,7 @@ def client_factory(api):
             Deletes the server counterpart of this instance. Does not destroy
             the instance itself, but it removes the id
             """
-            headers = {'Authorization': 'Bearer ' + self._api.token.accessToken}
+            headers = self._get_headers()
             method, endpoint = self._get_endpoint('delete', {'id': self.id})
             res = method(endpoint, headers=headers, verify=False)
             if res.status_code != 200:
