@@ -8,6 +8,7 @@
 .. moduleauthor:: Tomas Neme <lacrymology@gmail.com>
 
 """
+from datetime import datetime
 import json
 
 from mitreid.base import BaseApiObject
@@ -43,6 +44,16 @@ def token_factory(api):
             'read':   ('GET',    ''),
             'delete': ('DELETE', ''),
         }
+
+        def __init__(self, *args, **kwargs):
+            super(Token, self).__init__(*args, **kwargs)
+            if isinstance(self.accessTokenExpiresAt, basestring):
+                # convert this to date
+                try:
+                    self.accessTokenExpiresAt = datetime.strptime(self.accessTokenExpiresAt, "%Y-%m-%dT%H:%M:%S%z")
+                except:
+                    ts = self.accessTokenExpiresAt.split('+')[0]
+                    self.accessTokenExpiresAt = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S")
 
         @classmethod
         def create(cls, clientId, grantedScopes=None, grantedPersonas=None):
