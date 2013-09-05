@@ -73,21 +73,21 @@ def token_factory(api):
             return cls(attrs)
 
         @classmethod
-        def read(cls, token=None):
+        def read(cls, token):
             """
-            Loads self with info from the server. Only the clientToken property
-            needs to be filled in. Everything else will be overriden with the
-            data from the server
+            Returns a Token instance with the data for `token` loaded from the server
+
+            `token` is the accessToken string
             """
             if token is None:
                 token = cls._api.token.accessToken
-            headers = cls._get_headers()
+            headers = cls._get_headers({'Authorization': 'Bearer ' + token})
             method, endpoint = cls._get_endpoint('read')
+
             res = method(endpoint, headers=headers, verify=False)
             if res.status_code != 200:
                 raise MitreIdException
             attrs = json.loads(res.content)
-
             return cls(attrs)
         load_details = read
 
