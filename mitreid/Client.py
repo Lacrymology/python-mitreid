@@ -105,7 +105,7 @@ def client_factory(api):
             clients_json = json.loads(res.content)
             return [cls(cj) for cj in clients_json]
 
-        def _create(self):
+        def create(self):
             # make sure we don't have an id
             self.id = None
             data = json.dumps(self._todict())
@@ -134,7 +134,7 @@ def client_factory(api):
             return cls(attrs)
         get = read
 
-        def _update(self):
+        def update(self):
             """
             Updates the server counterpart of this instance with it's current
             attributes
@@ -169,9 +169,9 @@ def client_factory(api):
             Creates or updates in server from self
             """
             if self.id is None:
-                return self._create()
+                return self.create()
             else:
-                return self._update()
+                return self.update()
 
         def add_scopes(self, scopes):
             """
