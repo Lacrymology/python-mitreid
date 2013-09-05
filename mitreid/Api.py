@@ -13,7 +13,14 @@ from mitreid.Token import token_factory
 
 
 class Api(object):
-    defaultScopes = ['openid', 'profile', 'email', 'address', 'phone', 'offline_access']
+    defaultScopes = [
+        'openid',
+        'profile',
+        'email',
+        'address',
+        'phone',
+        # 'offline_access',
+    ]
     defaultPersonas = ['Home', 'Work', 'Mobile']
     def __init__(self, accessToken, oidcHost):
         """
