@@ -72,6 +72,18 @@ def token_factory(api):
             # create with server response
             return cls(attrs)
 
+        def save(self):
+            """
+            If you created a Token by filling in the clientId, grantedScopes and grantedPersonas fields, but
+            but leaving the accessToken field empty, this creates a token and fills self in with the data
+
+            if accessToken is present, this is a noop. If anything but clientId is not present, defaults will be used
+            """
+            if self.accessToken:
+                return
+            t = self.create(self.clientId, grantedScopes=self.grantedScopes, grantedPersonas=self.grantedPersonas)
+            self._fromdict(t._todict())
+
         @classmethod
         def read(cls, token):
             """
