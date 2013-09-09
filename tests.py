@@ -174,7 +174,7 @@ class TokenTestCase(unittest.TestCase):
 
         t.delete()
 
-    def test_read_default(self):
+    def _test_read_default(self):
         '''
         Test reading the default token
         '''
