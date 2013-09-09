@@ -100,8 +100,7 @@ def client_factory(api):
             headers = cls._get_headers()
             method, endpoint = cls._get_endpoint('list')
             res = method(endpoint, headers=headers, verify=False)
-            if res.status_code != 200:
-                raise MitreIdException
+            MitreIdException._wrap_requests_response(res)
             clients_json = json.loads(res.content)
             return [cls(cj) for cj in clients_json]
 
@@ -112,8 +111,7 @@ def client_factory(api):
             headers = self._get_headers(extra={'Content-Type': JSON_MEDIA_TYPE})
             method, endpoint = self._get_endpoint('create')
             res = method(endpoint, data=data, headers=headers, verify=False)
-            if res.status_code != 200:
-                raise MitreIdException
+            MitreIdException._wrap_requests_response(res)
             attrs = json.loads(res.content)
 
             # update with server-created defaults
@@ -127,8 +125,7 @@ def client_factory(api):
             headers = cls._get_headers()
             method, endpoint = cls._get_endpoint('read', {'id': id})
             res = method(endpoint, headers=headers, verify=False)
-            if res.status_code != 200:
-                raise MitreIdException
+            MitreIdException._wrap_requests_response(res)
             attrs = json.loads(res.content)
 
             return cls(attrs)
@@ -143,8 +140,7 @@ def client_factory(api):
             headers = self._get_headers(extra={'Content-Type': JSON_MEDIA_TYPE})
             method, endpoint = self._get_endpoint('update', {'id': self.id})
             res = method(endpoint, data=data, headers=headers, verify=False)
-            if res.status_code != 200:
-                raise MitreIdException
+            MitreIdException._wrap_requests_response(res)
 
             # update any fields returned from the server
             attrs = json.loads(res.content)
@@ -158,8 +154,7 @@ def client_factory(api):
             headers = self._get_headers()
             method, endpoint = self._get_endpoint('delete', {'id': self.id})
             res = method(endpoint, headers=headers, verify=False)
-            if res.status_code != 200:
-                raise MitreIdException
+            MitreIdException._wrap_requests_response(res)
 
             # remove this instance's id
             self.id = None

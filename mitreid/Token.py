@@ -76,8 +76,7 @@ def token_factory(api):
             headers = cls._get_headers(extra={'Content-Type': JSON_MEDIA_TYPE})
             method, endpoint = cls._get_endpoint('create')
             res = method(endpoint, data=data, headers=headers, verify=False)
-            if res.status_code != 200:
-                raise MitreIdException
+            MitreIdException._wrap_requests_response(res)
             attrs = json.loads(res.content)
 
             # create with server response
@@ -108,8 +107,7 @@ def token_factory(api):
             method, endpoint = cls._get_endpoint('read')
 
             res = method(endpoint, headers=headers, verify=False)
-            if res.status_code != 200:
-                raise MitreIdException
+            MitreIdException._wrap_requests_response(res)
             attrs = json.loads(res.content)
             return cls(attrs)
         load_details = read
@@ -123,8 +121,7 @@ def token_factory(api):
             headers = self._get_headers(extra={'Content-Type': JSON_MEDIA_TYPE})
             method, endpoint = self._get_endpoint('delete')
             res = method(endpoint, data=data, headers=headers, verify=False)
-            if res.status_code != 200:
-                raise MitreIdException
+            MitreIdException._wrap_requests_response(res)
         revoke = delete
 
         def __repr__(self):
