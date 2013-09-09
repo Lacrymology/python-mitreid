@@ -122,59 +122,57 @@ class TokenTestCase(unittest.TestCase):
 
     def setUp(self):
         '''
-        Create a per-test API object
+        Create per-test API and Client objects
         '''
         self.api = Api(TOKEN, HOST)
+        self.client_id = 'test_client'
+        self.personas = ['Mobile']
+        self.scopes = ['phone']
+        self.client = self.api.Client(clientId=self.client_id,
+                                 clientSecret='password',
+                                 scope=self.scopes)
+        self.client.save()
+
+    def tearDown(self):
+        self.client.delete()
+        del self.client_id
+        del self.personas
+        del self.client
+        del self.scopes
 
     def test_create_and_delete(self):
         '''
         Test the creation a deletion of a token
         '''
-        client_id = 'test_client'
-        personas = ['Mobile']
-        scopes = ['phone']
-        client = self.api.Client(clientId=client_id,
-                                 clientSecret='password',
-                                 scope=scopes)
-        client.save()
-        t = self.api.Token.create(client_id,
-                                  grantedScopes=scopes,
-                                  grantedPersonas=personas)
+        t = self.api.Token.create(self.client_id,
+                                  grantedScopes=self.scopes,
+                                  grantedPersonas=self.personas)
 
-        self.assertEqual(t.clientId, client_id)
-        for scope in scopes:
+        self.assertEqual(t.clientId, self.client_id)
+        for scope in self.scopes:
             self.assertIn(scope, t.authorizedScopesSet)
-        self.assertEqual(t.authorizedPersonaSet, personas)
+        self.assertEqual(t.authorizedPersonaSet, self.personas)
 
         t.delete()
-        client.delete()
 
     def test_read(self):
         '''
         Test reading a token
         '''
-        client_id = 'test_client'
-        personas = ['Mobile']
-        scopes = ['phone']
-        client = self.api.Client(clientId=client_id,
-                                 clientSecret='password',
-                                 scope=scopes)
-        client.save()
-        t = self.api.Token.create(client_id,
-                                  grantedScopes=scopes,
-                                  grantedPersonas=personas)
+        t = self.api.Token.create(self.client_id,
+                                  grantedScopes=self.scopes,
+                                  grantedPersonas=self.personas)
 
         token = self.api.Token.read(t.accessToken)
-        for scope in scopes:
+        for scope in self.scopes:
             self.assertIn(scope, token.authorizedScopesSet)
-        self.assertEqual(token.authorizedPersonaSet, personas)
+        self.assertEqual(token.authorizedPersonaSet, self.personas)
         self.assertGreater(len(token.accessToken), 0)
         self.assertIsNotNone(token.accessTokenExpiresAt)
-        self.assertEqual(token.clientId, client_id)
+        self.assertEqual(token.clientId, self.client_id)
         self.assertGreater(len(token.authorizingUser), 0)
 
         t.delete()
-        client.delete()
 
     def test_read_default(self):
         '''
