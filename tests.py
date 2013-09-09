@@ -174,17 +174,5 @@ class TokenTestCase(unittest.TestCase):
 
         t.delete()
 
-    def _test_read_default(self):
-        '''
-        Test reading the default token
-        '''
-        token = self.api.Token.read()
-        self.assertEqual(token.authorizedScopesSet, SCOPES_FOR_TOKEN)
-        self.assertEqual(token.authorizedPersonaSet, PERSONAS_FOR_TOKEN)
-        self.assertEqual(token.accessToken, TOKEN)
-        self.assertIsNotNone(token.accessTokenExpiresAt)
-        self.assertEqual(token.clientId, CLIENT_ID_FOR_TOKEN)
-        self.assertEqual(token.authorizingUser, USER_FOR_TOKEN)
-
 if __name__ == '__main__':
     unittest.main()
