@@ -4,7 +4,7 @@ from mitreid.Api import Api
 from mitreid.exceptions import MitreIdException
 
 HOST = 'logrus.idhypercubed.org'
-TOKEN = """eyJhbGciOiJSUzI1NiJ9.eyJleHAiOjEzNzg0NzQyMzQsImF1ZCI6WyJpZDMtb2ljLWRlbW8tY2xpZW50Il0sImlzcyI6Imh0dHBzOlwvXC9sb2dydXMuaWRoeXBlcmN1YmVkLm9yZ1wvaWRvaWNcLyIsImp0aSI6IjY5OTcwODRhLTExMTMtNDRiMi05MDhmLTUwOWRmZTUwZGIyMSIsImlhdCI6MTM3NDg3NDIzNH0.B01BHN82r34_WFSiLkzFH5pOs-brXJT5_lkwnGXfQqepVO1jgX0W3dJgsr8fqC5cWWISxbV6Mx76udnWYiRVDWUEdUL2KgMltZIXqgy5ru8TmL9USw0hXFarAmcANyOM8cyF2lvT2qCUeW_Dda7X3g8nhV_U4ceFrtF6jJK3WLc"""
+TOKEN = """eyJhbGciOiJSUzI1NiJ9.eyJleHAiOjEzODE5OTkwNDMsImF1ZCI6WyJpZDMtb2ljLWRlbW8tY2xpZW50Il0sImlzcyI6Imh0dHBzOlwvXC9sb2dydXMuaWRoeXBlcmN1YmVkLm9yZ1wvaWRvaWNcLyIsImp0aSI6ImEyODg0ZGM1LTFhZjQtNGI2ZS04MjZhLWJmODNiYzRhM2E0ZiIsImlhdCI6MTM3ODM5OTA0M30.mrD9nWBVSb_x7SducGqQFrELB60soho6dF92EW6gLVOjer4acoxMkH9FChKfS98BRr4ji6Yj7wGi8XQy8HHeVwMKoKjZCRt2OxwQBrKBaEH3hX5ln1r7-Op3WwSCn5w0QwFR37TrYq6eGd3cheVy2LStjwg6vsetFLuIilyZ_b0"""
 SCOPES_FOR_TOKEN = ['address', 'email', 'openid', 'phone', 'profile',
                     'superclient']
 PERSONAS_FOR_TOKEN = []
@@ -122,71 +122,57 @@ class TokenTestCase(unittest.TestCase):
 
     def setUp(self):
         '''
-        Create a per-test API object
+        Create per-test API and Client objects
         '''
         self.api = Api(TOKEN, HOST)
+        self.client_id = 'test_client'
+        self.personas = ['Mobile']
+        self.scopes = ['phone']
+        self.client = self.api.Client(clientId=self.client_id,
+                                 clientSecret='password',
+                                 scope=self.scopes)
+        self.client.save()
+
+    def tearDown(self):
+        self.client.delete()
+        del self.client_id
+        del self.personas
+        del self.client
+        del self.scopes
 
     def test_create_and_delete(self):
         '''
         Test the creation a deletion of a token
         '''
-        client_id = 'test_client'
-        personas = ['Mobile']
-        scopes = ['phone']
-        client = self.api.Client(clientId=client_id,
-                                 clientSecret='password',
-                                 scope=scopes)
-        client.save()
-        t = self.api.Token.create(client_id,
-                                  grantedScopes=scopes,
-                                  grantedPersonas=personas)
+        t = self.api.Token.create(self.client_id,
+                                  grantedScopes=self.scopes,
+                                  grantedPersonas=self.personas)
 
-        self.assertEqual(t.clientId, client_id)
-        for scope in scopes:
+        self.assertEqual(t.clientId, self.client_id)
+        for scope in self.scopes:
             self.assertIn(scope, t.authorizedScopesSet)
-        self.assertEqual(t.authorizedPersonaSet, personas)
+        self.assertEqual(t.authorizedPersonaSet, self.personas)
 
         t.delete()
-        client.delete()
 
     def test_read(self):
         '''
         Test reading a token
         '''
-        client_id = 'test_client'
-        personas = ['Mobile']
-        scopes = ['phone']
-        client = self.api.Client(clientId=client_id,
-                                 clientSecret='password',
-                                 scope=scopes)
-        client.save()
-        t = self.api.Token.create(client_id,
-                                  grantedScopes=scopes,
-                                  grantedPersonas=personas)
+        t = self.api.Token.create(self.client_id,
+                                  grantedScopes=self.scopes,
+                                  grantedPersonas=self.personas)
 
         token = self.api.Token.read(t.accessToken)
-        for scope in scopes:
+        for scope in self.scopes:
             self.assertIn(scope, token.authorizedScopesSet)
-        self.assertEqual(token.authorizedPersonaSet, personas)
+        self.assertEqual(token.authorizedPersonaSet, self.personas)
         self.assertGreater(len(token.accessToken), 0)
         self.assertIsNotNone(token.accessTokenExpiresAt)
-        self.assertEqual(token.clientId, client_id)
+        self.assertEqual(token.clientId, self.client_id)
         self.assertGreater(len(token.authorizingUser), 0)
 
         t.delete()
-        client.delete()
-
-    def test_read_default(self):
-        '''
-        Test reading the default token
-        '''
-        token = self.api.Token.read()
-        self.assertEqual(token.authorizedScopesSet, SCOPES_FOR_TOKEN)
-        self.assertEqual(token.authorizedPersonaSet, PERSONAS_FOR_TOKEN)
-        self.assertEqual(token.accessToken, TOKEN)
-        self.assertIsNotNone(token.accessTokenExpiresAt)
-        self.assertEqual(token.clientId, CLIENT_ID_FOR_TOKEN)
-        self.assertEqual(token.authorizingUser, USER_FOR_TOKEN)
 
 if __name__ == '__main__':
     unittest.main()

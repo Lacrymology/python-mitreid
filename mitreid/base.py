@@ -27,14 +27,13 @@ class BaseApiObject(object):
     _API_ROOT = ''
     _ENDPOINTS = {}
 
-    def __init__(self, api, attrs=None, **kwargs):
+    def __init__(self, attrs=None, **kwargs):
         """
         attrs can be a dictionary of values to override the defaults, or
         the fields can be passed as keyword arguments.
 
         Keyword arguments take precedence before the attrs dictionary
         """
-        self._api = api
         d = copy.deepcopy(self._DEFAULTS)
         if attrs:
             d.update(attrs)
@@ -63,7 +62,15 @@ class BaseApiObject(object):
             fmt = {}
         method, endpoint = cls._ENDPOINTS[endpoint]
         f = getattr(requests, method.lower())
-        return f, endpoint.format(**fmt)
+        return f, "{}{}{}".format(cls._api.root, # https://example.com
+                                  cls._API_ROOT, # /path/to/(clients|tokenapi)
+                                  endpoint       # /{id}
+                                  ).format(**fmt)
 
-    def _auth(self):
-        return self._api.token
+    @classmethod
+    def _get_headers(cls, extra=None):
+        if extra is None:
+            extra = {}
+        headers = {'Authorization': 'Bearer ' + cls._api.token.accessToken}
+        headers.update(extra)
+        return headers

@@ -18,6 +18,7 @@ JSON_MEDIA_TYPE = 'application/json'
 
 def client_factory(api):
     class Client(BaseApiObject):
+        _api = api
         _DEFAULTS = {
             "id": None,  # diff
             "clientId": "",  # diff
@@ -30,14 +31,7 @@ def client_factory(api):
             "contacts": [],
             "tosUri": None,
             "tokenEndpointAuthMethod": None,
-            "scope": [
-                # "phone",
-                # "openid",
-                # "offline_access",
-                # "address",
-                # "email",
-                # "profile"
-            ],
+            "scope": api.defaultGrantedScopes(),
             "grantTypes": [
                 # "implicit",
                 # "authorization_code",
@@ -75,14 +69,14 @@ def client_factory(api):
             "createdAt": None
         }
 
-        _API_ROOT = 'https://{host}/idoic/api/clients'
+        _API_ROOT = '/idoic/api/clients'
 
         _ENDPOINTS = {
-            'list':   ('GET',    _API_ROOT),
-            'create': ('POST',   _API_ROOT),
-            'read':   ('GET',    _API_ROOT + '/{id}'),
-            'update': ('PUT',    _API_ROOT + '/{id}'),
-            'delete': ('DELETE', _API_ROOT + '/{id}'),
+            'list':   ('GET',    ''),
+            'create': ('POST',   ''),
+            'read':   ('GET',    '/{id}'),
+            'update': ('PUT',    '/{id}'),
+            'delete': ('DELETE', '/{id}'),
         }
 
         def __init__(self, attrs=None, **kwargs):
@@ -95,7 +89,7 @@ def client_factory(api):
             If an 'id' attribute is present, the Client is assumed to have a
             server counterpart
             """
-            super(Client, self).__init__(api, attrs=attrs, **kwargs)
+            super(Client, self).__init__(attrs=attrs, **kwargs)
 
             # if a clientSecret was provided, we need to override this default
             if self.clientSecret:
@@ -103,26 +97,21 @@ def client_factory(api):
 
         @classmethod
         def clients_list(cls):
-            headers = {'Authorization': 'Bearer ' + api.token.accessToken}
-            method, endpoint = cls._get_endpoint('list',
-                                                 {'host': api.oidcHost})
+            headers = cls._get_headers()
+            method, endpoint = cls._get_endpoint('list')
             res = method(endpoint, headers=headers, verify=False)
-            if res.status_code != 200:
-                raise MitreIdException
+            MitreIdException._wrap_requests_response(res)
             clients_json = json.loads(res.content)
             return [cls(cj) for cj in clients_json]
 
-        def _create(self):
+        def create(self):
             # make sure we don't have an id
             self.id = None
             data = json.dumps(self._todict())
-            headers={'Authorization': 'Bearer ' + api.token.accessToken,
-                     'Content-Type': JSON_MEDIA_TYPE}
-            method, endpoint = self._get_endpoint('create',
-                                                  {'host': api.oidcHost})
+            headers = self._get_headers(extra={'Content-Type': JSON_MEDIA_TYPE})
+            method, endpoint = self._get_endpoint('create')
             res = method(endpoint, data=data, headers=headers, verify=False)
-            if res.status_code != 200:
-                raise MitreIdException
+            MitreIdException._wrap_requests_response(res)
             attrs = json.loads(res.content)
 
             # update with server-created defaults
@@ -133,32 +122,25 @@ def client_factory(api):
             """
             Returns a single Client getting it from the server by id
             """
-            headers = {'Authorization': 'Bearer ' + api.token.accessToken}
-            method, endpoint = cls._get_endpoint('read',
-                                                 {'host': api.oidcHost,
-                                                  'id': id})
+            headers = cls._get_headers()
+            method, endpoint = cls._get_endpoint('read', {'id': id})
             res = method(endpoint, headers=headers, verify=False)
-            if res.status_code != 200:
-                raise MitreIdException
+            MitreIdException._wrap_requests_response(res)
             attrs = json.loads(res.content)
 
             return cls(attrs)
         get = read
 
-        def _update(self):
+        def update(self):
             """
             Updates the server counterpart of this instance with it's current
             attributes
             """
             data = json.dumps(self._todict())
-            headers = {'Authorization': 'Bearer ' + api.token.accessToken,
-                       'Content-Type': JSON_MEDIA_TYPE}
-            method, endpoint = self._get_endpoint('update',
-                                                  {'host': api.oidcHost,
-                                                   'id': self.id})
+            headers = self._get_headers(extra={'Content-Type': JSON_MEDIA_TYPE})
+            method, endpoint = self._get_endpoint('update', {'id': self.id})
             res = method(endpoint, data=data, headers=headers, verify=False)
-            if res.status_code != 200:
-                raise MitreIdException
+            MitreIdException._wrap_requests_response(res)
 
             # update any fields returned from the server
             attrs = json.loads(res.content)
@@ -169,13 +151,10 @@ def client_factory(api):
             Deletes the server counterpart of this instance. Does not destroy
             the instance itself, but it removes the id
             """
-            headers = {'Authorization': 'Bearer ' + api.token.accessToken}
-            method, endpoint = self._get_endpoint('delete',
-                                                  {'host': api.oidcHost,
-                                                   'id': self.id})
+            headers = self._get_headers()
+            method, endpoint = self._get_endpoint('delete', {'id': self.id})
             res = method(endpoint, headers=headers, verify=False)
-            if res.status_code != 200:
-                raise MitreIdException
+            MitreIdException._wrap_requests_response(res)
 
             # remove this instance's id
             self.id = None
@@ -185,9 +164,9 @@ def client_factory(api):
             Creates or updates in server from self
             """
             if self.id is None:
-                return self._create()
+                return self.create()
             else:
-                return self._update()
+                return self.update()
 
         def add_scopes(self, scopes):
             """
