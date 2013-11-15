@@ -30,14 +30,6 @@
 # in this Software without prior written authorization from the
 # Institute for Institutional Innovation by Data Driven Design Inc.
 
-"""
-.. module::
-   :platform: Unix
-   :synopsis: Client class
-
-.. moduleauthor:: Tomas Neme <lacrymology@gmail.com>
-"""
-
 __author__ = 'Tomas Neme'
 __maintainer__ = 'Tomas Neme'
 __email__ = 'lacrymology@gmail.com'
@@ -51,6 +43,13 @@ JSON_MEDIA_TYPE = 'application/json'
 
 def client_factory(api):
     class Client(BaseApiObject):
+        """
+        Client Api object. Allows retrieving list of registered clients,
+        creation of new clients, getting details, updating and deleting
+        existing clients,
+
+
+        """
         _api = api
         _DEFAULTS = {
             "id": None,  # diff
@@ -114,13 +113,11 @@ def client_factory(api):
 
         def __init__(self, attrs=None, **kwargs):
             """
-            attrs can be a dictionary of values to override the defaults, or
-            the fields can be passed as keyword arguments.
+            See docs for ``mitreid.base.BaseApiObject``
 
-            Keyword arguments take precedence before the attrs dictionary
-
-            If an 'id' attribute is present, the Client is assumed to have a
+            If an ``id`` attribute is present, the Client is assumed to have a
             server counterpart
+
             """
             super(Client, self).__init__(attrs=attrs, **kwargs)
 
@@ -130,6 +127,10 @@ def client_factory(api):
 
         @classmethod
         def clients_list(cls):
+            """
+            Get the list of registered clients from the server
+
+            """
             headers = cls._get_headers()
             method, endpoint = cls._get_endpoint('list')
             res = method(endpoint, headers=headers, verify=False)
@@ -138,6 +139,10 @@ def client_factory(api):
             return [cls(cj) for cj in clients_json]
 
         def create(self):
+            """
+            Save this object on the server
+
+            """
             # make sure we don't have an id
             self.id = None
             data = json.dumps(self._todict())
@@ -154,6 +159,7 @@ def client_factory(api):
         def read(cls, id):
             """
             Returns a single Client getting it from the server by id
+
             """
             headers = cls._get_headers()
             method, endpoint = cls._get_endpoint('read', {'id': id})
@@ -168,6 +174,7 @@ def client_factory(api):
             """
             Updates the server counterpart of this instance with it's current
             attributes
+
             """
             data = json.dumps(self._todict())
             headers = self._get_headers(extra={'Content-Type': JSON_MEDIA_TYPE})
@@ -183,6 +190,7 @@ def client_factory(api):
             """
             Deletes the server counterpart of this instance. Does not destroy
             the instance itself, but it removes the id
+
             """
             headers = self._get_headers()
             method, endpoint = self._get_endpoint('delete', {'id': self.id})
@@ -194,7 +202,8 @@ def client_factory(api):
 
         def save(self):
             """
-            Creates or updates in server from self
+            Creates or updates in server from ``self``
+
             """
             if self.id is None:
                 return self.create()
@@ -203,9 +212,10 @@ def client_factory(api):
 
         def add_scopes(self, scopes):
             """
-            Add scopes to Client
+            Add scopes to ``Client``
 
-            `scopes` can be either a single scope string, or an iterable
+            :param scopes: can be either a single scope string, or an iterable
+
             """
             if isinstance(scopes, basestring):
                 scopes = [scopes]
@@ -215,9 +225,10 @@ def client_factory(api):
 
         def remove_scopes(self, scopes):
             """
-            Remove scopes from Client
+            Remove scopes from ``Client``
 
-            `scopes` can be either a single scope string, or an iterable
+            :param scopes: can be either a single scope string, or an iterable
+
             """
             if isinstance(scopes, basestring):
                 scopes = [scopes]

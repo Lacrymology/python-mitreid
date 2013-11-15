@@ -30,14 +30,6 @@
 # in this Software without prior written authorization from the
 # Institute for Institutional Innovation by Data Driven Design Inc.
 
-"""
-.. module::
-   :platform: Unix
-   :synopsis: Default base class for API classes
-
-.. moduleauthor:: Tomas Neme <lacrymology@gmail.com>
-"""
-
 __author__ = 'Tomas Neme'
 __maintainer__ = 'Tomas Neme'
 __email__ = 'lacrymology@gmail.com'
@@ -47,15 +39,19 @@ import requests
 
 class BaseApiObject(object):
     """
-    * _DEFAULTS is a dictionary are the default values for the subclass. It's
-      keys list is used to build the dictionary to be passed as data to the
+    Base class for Api endpoint objects, like ``Token`` and ``Client``.
+
+    * ``_DEFAULTS`` is a dictionary are the default values for the subclass.
+      It's keys list is used to build the dictionary to be passed as data to the
       requests
-    * _API_ROOT is the root path the endpoints are based of.
-    * _ENDPOINTS is the list of endpoints in this form: {
-            action: (http method, /endpoint/path),
-            }. /endpoint/path is based on _API_ROOT.
+    * ``_API_ROOT`` is the root path the endpoints are based of.
+    * ``_ENDPOINTS`` is the list of endpoints in this form:
+      ``{ action: (http method, /endpoint/path), }``.
+      /endpoint/path is based on ``_API_ROOT``.
+
       For example, with API_ROOT=/api/clients, { 'update': ('put', '/{id}')} will
       make a PUT request to /api/clients/{id}
+
     """
     _DEFAULTS = {}
     _API_ROOT = ''
@@ -63,10 +59,15 @@ class BaseApiObject(object):
 
     def __init__(self, attrs=None, **kwargs):
         """
-        attrs can be a dictionary of values to override the defaults, or
-        the fields can be passed as keyword arguments.
+        The object can be built passing a can be a dictionary of values to
+        override the defaults through ``attrs``, or the fields can be passed as
+        keyword arguments.
 
-        Keyword arguments take precedence before the attrs dictionary
+        Keyword arguments take precedence before the ``attrs`` dictionary
+
+        :param attrs: A list of ``str`` with the attributes names to be
+            serialized
+
         """
         d = copy.deepcopy(self._DEFAULTS)
         if attrs:
@@ -76,6 +77,15 @@ class BaseApiObject(object):
         self._fromdict(d)
 
     def _todict(self, attributes_list=None):
+        """
+        Convert ``self`` to a dictionary. Used to pass it as a parameter in the
+        requests
+
+        :param attributes_list: the list of attributes that need to be
+        serialized. If left null, the keys of the ``_DEFAULTS`` dictionary is
+        used.
+
+        """
         if attributes_list is None:
             attributes_list = self._DEFAULTS.keys()
         ret = {}
@@ -87,14 +97,36 @@ class BaseApiObject(object):
         return ret
 
     def _fromdict(self, attrs):
+        """
+        Populate ``self`` from a dictionary. Each key in the dictionary will be
+        reflected as a property in ``self``. E.g.:
+        ``obj._fromdict({'foo': 'bar'})`` is equivalent to ``obj.foo = 'bar'``
+
+        :param attrs: the dictionary to use to populate
+
+        """
         for k, v in attrs.items():
             setattr(self, k, v)
 
     @classmethod
-    def _get_endpoint(cls, endpoint, fmt=None):
+    def _get_endpoint(cls, class_method, fmt=None):
+        """
+        Returns the endpoint for a given method of this class, and the request
+        method to be used. The endpoint is constructed by joining
+        ``cls._api.root``, ``cls._API_ROOT``, and ``cls._ENDPOINTS``. The return
+        value is a function, which can be ``requests.get``, ``requests.post``,
+        ``requests.delete``, etc., and a string with the URL
+
+        :param class_method: what you want to do. Examples: 'list', 'create',
+            'read', 'update'
+        :param fmt: the parameters to pass ``str.format`` after all of
+
+        :rtype: tuple(function, str).
+
+        """
         if fmt is None:
             fmt = {}
-        method, endpoint = cls._ENDPOINTS[endpoint]
+        method, endpoint = cls._ENDPOINTS[class_method]
         f = getattr(requests, method.lower())
         return f, "{}{}{}".format(cls._api.root, # https://example.com
                                   cls._API_ROOT, # /path/to/(clients|tokenapi)
@@ -103,6 +135,12 @@ class BaseApiObject(object):
 
     @classmethod
     def _get_headers(cls, extra=None):
+        """
+        Return the default header dict for the http request
+
+        :param extra: A dictionary with any required extra headers
+
+        """
         if extra is None:
             extra = {}
         headers = {'Authorization': 'Bearer ' + cls._api.token.accessToken}

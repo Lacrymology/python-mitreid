@@ -55,11 +55,15 @@ def token_factory(api):
         """
         OAuth Token class.
 
-        Call Token.create(clientId) to create a Token on behalf of a client.
-        Call token.revoke() (or delete()) to revoke this token
-        To get a Token's details, you need to do:
-            token = Token(accessToken=<access token>)
-            token.load_details() (or .read())
+        Call ``Token.create(clientId)`` to create a ``Token`` on behalf of a
+        client.
+        Call ``token.revoke()`` (or ``delete()``) to revoke this token
+        To get a ``Token``'s details, you need to do:
+        .. code-block::
+
+            >>> token = Token(accessToken=<access token>)
+            >>> token.load_details() # (or .read())
+
         """
         _api = api
         _DEFAULTS = {
@@ -92,11 +96,13 @@ def token_factory(api):
         @classmethod
         def create(cls, clientId, grantedScopes=None, grantedPersonas=None):
             """
-            Create a new Token on behalf of client `clientId`
+            Create a new Token on behalf of client ``clientId``
 
-            If called with None (default), grantedScopes and grantedPersonas
-            will be set to the defaults defined by the Api instance. If you want
-            to grant no scopes or personas, pass empty lists instead
+            If called with ``None`` (default), ``grantedScopes`` and
+            ``grantedPersonas`` will be set to the defaults defined by the
+            ``Api`` instance. If you want to grant no scopes or personas, pass
+            empty lists instead
+
             """
             if grantedScopes is None:
                 grantedScopes = cls._api.defaultGrantedScopes()
@@ -118,10 +124,14 @@ def token_factory(api):
 
         def save(self):
             """
-            If you created a Token by filling in the clientId, grantedScopes and grantedPersonas fields, but
-            but leaving the accessToken field empty, this creates a token and fills self in with the data
+            If you created a ``Token`` by filling in the ``clientId``,
+            ``grantedScopes`` and ``grantedPersonas`` fields, but leaving the
+            ``accessToken`` field empty, this creates a token and fills self in
+            with the data
 
-            if accessToken is present, this is a noop. If anything but clientId is not present, defaults will be used
+            if ``accessToken`` is present, this is a noop. If anything but
+            ``clientId`` is not present, defaults will be used
+
             """
             if self.accessToken:
                 return
@@ -131,9 +141,11 @@ def token_factory(api):
         @classmethod
         def read(cls, token):
             """
-            Returns a Token instance with the data for `token` loaded from the server
+            Returns a ``Token`` instance with the data for ``token`` loaded
+            from the server
 
-            `token` is the accessToken string
+            :param token: the ``accessToken`` string
+
             """
             if token is None:
                 token = cls._api.token.accessToken
@@ -148,7 +160,8 @@ def token_factory(api):
 
         def delete(self):
             """
-            Revokes this Token
+            Revokes this ``Token``
+
             """
             data = json.dumps({'clientId': self.clientId,
                                'clientToken': self.accessToken})

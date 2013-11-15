@@ -30,14 +30,6 @@
 # in this Software without prior written authorization from the
 # Institute for Institutional Innovation by Data Driven Design Inc.
 
-"""
-.. module::
-   :platform: Unix
-   :synopsis: TODO
-
-.. moduleauthor:: Tomas Neme <lacrymology@gmail.com>
-"""
-
 __author__ = 'Tomas Neme'
 __maintainer__ = 'Tomas Neme'
 __email__ = 'lacrymology@gmail.com'
@@ -47,6 +39,21 @@ from mitreid.Token import token_factory
 
 
 class Api(object):
+    """
+    Main interface class. Use like:
+
+    .. code-block:: python
+
+       >>> from mitreid.Api import Api
+       >>> api = Api(token, 'oidc.example.com')
+       >>> api.Client.clients_list()
+       [[Client: id client-id client-name], [Client: ....]...]
+       >>> client = api.Client.get("id")
+       >>> client.scope.append('foo')
+       >>> client.save()
+       >>> token = api.Token.create("client-id")
+
+    """
     defaultScopes = [
         'openid',
         'profile',
@@ -58,8 +65,13 @@ class Api(object):
     defaultPersonas = ['Home', 'Work', 'Mobile']
     def __init__(self, accessToken, oidcHost):
         """
-        `accessToken` is an accessToken string that identifies the requesting
-        user
+        :param accessToken: an accessToken string that identifies the requesting
+            user
+
+        :param oidcHost: the domain (+ optionally base path) of your OIDC server.
+            If your API lives in example.com/foo/idoic, set this to
+            ``'example.com/foo'``
+
         """
         self.oidcHost = oidcHost
         self.root = 'https://{}'.format(self.oidcHost)
@@ -68,7 +80,17 @@ class Api(object):
         self.Client = client_factory(self)
 
     def defaultGrantedScopes(self):
+        """
+        Returns the list of scopes to be granted to newly created tokens
+        and clients default
+
+        """
         return self.defaultScopes
 
     def defaultGrantedPersonas(self):
+        """
+        Returns the list of personas to be granted to newly created tokens by
+        default
+
+        """
         return self.defaultPersonas

@@ -31,13 +31,27 @@
 # Institute for Institutional Innovation by Data Driven Design Inc.
 
 """
-.. module::
-   :platform: Unix
-   :synopsis: TODO
+    mitreid
+    ~~~~~~~
 
-.. moduleauthor:: Tomas Neme <lacrymology@gmail.com>
+    Simple Python API Client for the OIDC/MITREid Connect API. It allows the
+    creation of `Client`s and `Token`s in behalf of those clients.
+
+    In order to create a token in behalf of a `Client`, the Api itself must be
+    given a token with the right permissions.
+
+    :codeauthor: `Tomas Neme <lacrymology@gmail.com>`
+    :copyright: (c) 2013 by IDCubed
+    :license: ID3 MIT
 """
 
+__package_name__    = 'mitreid'
+__summary__         = 'API-related snippets for django-based OMS apps'
 __author__ = 'Tomas Neme'
 __maintainer__ = 'Tomas Neme'
 __email__ = 'lacrymology@gmail.com'
+__license__         = 'ID3 MIT'
+__description__     = __doc__
+__version_info__    = (0, 0, 1)
+__version__         = '.'.join(map(str, __version_info__))
+__url__  = 'https://github.com/IDCubed/python-mitreid/'
